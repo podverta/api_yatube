@@ -4,10 +4,12 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 from rest_framework.routers import DefaultRouter
-from .views import APIPost
+from .views import APIPost, APIComment
 
 router = DefaultRouter()
 router.register('posts', APIPost, basename='posts')
+router.register('posts/(?P<post_id>[0-9]+)/comments', APIComment,
+                basename='comments')
 
 urlpatterns = [
     path('token/', TokenObtainPairView.as_view(),
