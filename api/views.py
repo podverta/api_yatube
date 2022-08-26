@@ -1,7 +1,12 @@
 from rest_framework import viewsets, status, filters, generics
 from rest_framework.response import Response
-from .models import Post, Comment, Follow
-from .serializers import PostSerializer, CommentSerializer, FollowSerializer
+from .models import Post, Comment, Follow, Group
+from .serializers import  (
+    PostSerializer,
+    CommentSerializer,
+    FollowSerializer,
+    GroupSerializer
+)
 from django.shortcuts import get_object_or_404
 
 class APIPost(viewsets.ViewSet):
@@ -98,16 +103,19 @@ class APIComment(viewsets.ViewSet):
 
 class APIFollow(generics.ListCreateAPIView):
 
-        queryset = Follow.objects.all()
         serializer_class = FollowSerializer
         filter_backends = [filters.SearchFilter]
         search_fields = ['user__username',]
 
-        def perfom_create(self, request, following):
+        def get_queryset(self):
+            user = self.request.user
+            return user.following.all()
+
+        def perform_create(self, serializer):
             serializer.save(user=self.request.user)
 
-            # serializer = FollowSerializer(following, data=request.user)
-            # if serializer.is_valid():
-            #     serializer.save(user=request.user)
-            #     return Response(serializer.data, status=status.HTTP_200_OK)
-            # return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+class APIGroup(generics.ListCreateAPIView):
+        queryset = Group.objects.all()
+        serializer_class = GroupSerializer
+        filter_backends = [filters.SearchFilter]
+        search_fields = ['title',]
