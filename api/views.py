@@ -1,7 +1,7 @@
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, filters, generics
 from rest_framework.response import Response
-from .models import Post, Comment
-from .serializers import PostSerializer, CommentSerializer
+from .models import Post, Comment, Follow
+from .serializers import PostSerializer, CommentSerializer, FollowSerializer
 from django.shortcuts import get_object_or_404
 
 class APIPost(viewsets.ViewSet):
@@ -95,3 +95,19 @@ class APIComment(viewsets.ViewSet):
             comment.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(status=status.HTTP_403_FORBIDDEN)
+
+class APIFollow(generics.ListCreateAPIView):
+
+        queryset = Follow.objects.all()
+        serializer_class = FollowSerializer
+        filter_backends = [filters.SearchFilter]
+        search_fields = ['user__username',]
+
+        def perfom_create(self, request, following):
+            serializer.save(user=self.request.user)
+
+            # serializer = FollowSerializer(following, data=request.user)
+            # if serializer.is_valid():
+            #     serializer.save(user=request.user)
+            #     return Response(serializer.data, status=status.HTTP_200_OK)
+            # return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
