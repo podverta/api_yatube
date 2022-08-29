@@ -13,7 +13,7 @@ class PostSerializer(serializers.ModelSerializer):
 
 class CommentSerializer(serializers.ModelSerializer):
     author = serializers.ReadOnlyField(source='author.username')
-    post = serializers.ReadOnlyField(source='post.post_id')
+    post = serializers.IntegerField(source='post_id', required=False)
     class Meta:
         fields = ('id', 'author', 'post', 'text', 'created',)
         model = Comment
@@ -26,5 +26,5 @@ class FollowSerializer(serializers.ModelSerializer):
 
 class GroupSerializer(serializers.ModelSerializer):
     class Meta:
-        fields = ('title',)
+        fields = ('title', 'id',)
         model = Group

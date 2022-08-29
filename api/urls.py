@@ -1,10 +1,10 @@
 from django.urls import path
 
 from rest_framework.routers import DefaultRouter
-from .views import APIPost, APIComment, APIFollow, APIGroup
+from .views import PostViewSet, APIComment, APIFollow, APIGroup
 
 router = DefaultRouter()
-router.register('posts', APIPost, basename='posts')
+router.register('posts', PostViewSet)
 router.register('posts/(?P<post_id>[0-9]+)/comments', APIComment,
                 basename='comments')
 
