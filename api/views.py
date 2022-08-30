@@ -1,5 +1,6 @@
-from rest_framework import viewsets, status, filters, generics
+from rest_framework import viewsets, status, filters, generics, mixins
 from rest_framework.response import Response
+from django_filters.rest_framework import DjangoFilterBackend
 from .models import Post, Comment, Follow, Group
 from .serializers import  (
     PostSerializer,
@@ -9,11 +10,11 @@ from .serializers import  (
 )
 from django.shortcuts import get_object_or_404
 
-class PostViewSet(viewsets.ViewSet):
+class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
-    def list(self, request):
-        serializer = PostSerializer(self.queryset, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    serializer_class = PostSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['group', ]
 
     def create(self, request):
         serializer = PostSerializer(data=request.data)
@@ -105,18 +106,30 @@ class APIComment(viewsets.ViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(status=status.HTTP_403_FORBIDDEN)
 
-class APIFollow(generics.ListCreateAPIView):
+class APIFollow(viewsets.ModelViewSet):
 
+        queryset = Follow.objects.all()
         serializer_class = FollowSerializer
         filter_backends = [filters.SearchFilter]
-        search_fields = ['user__username',]
+        search_fields = ['user__username', ]
 
-        def get_queryset(self):
-            user = self.request.user
-            return user.following.all()
+        def list(self, request, *args, **kwargs):
+            queryset = Follow.objects.filter(user__username=request.user)
+            serializer_class = FollowSerializer(queryset, many=True)
+            return Response(serializer_class.data, status=status.HTTP_200_OK)
 
-        def perform_create(self, serializer):
-            serializer.save(user=self.request.user)
+
+        def create(self, request, *args, **kwargs):
+            serializer_class = FollowSerializer(request.data)
+            if request.user.is_authenticated == True:
+                if serializer_class.is_valid():
+                    serializer_class.save(user__username=request.user)
+                    return Response(serializer_class.data,
+                                    status=status.HTTP_201_CREATED)
+                return Response(serializer_class.errors,
+                                status=status.HTTP_400_BAD_REQUEST)
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
 
 class APIGroup(generics.ListCreateAPIView):
         queryset = Group.objects.all()

@@ -7,13 +7,13 @@ router = DefaultRouter()
 router.register('posts', PostViewSet)
 router.register('posts/(?P<post_id>[0-9]+)/comments', APIComment,
                 basename='comments')
+router.register('follow', APIFollow)
 
 
 urlpatterns = [
 
-    path('follow/', APIFollow.as_view()),
-
     path('group/', APIGroup.as_view()),
+
 ]
 
 urlpatterns += router.urls
