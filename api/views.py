@@ -79,8 +79,7 @@ class APIComment(viewsets.ViewSet):
     def update(self, request, post_id, pk):
         comment = get_object_or_404(Comment, pk=pk,)
         if comment.author == request.user:
-            serializer = CommentSerializer(comment, data=request.data,
-                                           )
+            serializer = CommentSerializer(comment, data=request.data)
             if serializer.is_valid():
                 serializer.save(author=request.user)
                 return Response(serializer.data, status=status.HTTP_200_OK)
